@@ -13,8 +13,6 @@ public class SemanticAlgorithmMain extends Configured {
     /**
      * Initialization
      */
-    public static String driverName = "org.apache.hive.jdbc.HiveDriver";
-    public static String table_result;
 
     public static void main(String[] args) throws IOException, SQLException {
         System.setProperty("hive.metastore.uris", "thrift://sandbox.kylo.io:9083");

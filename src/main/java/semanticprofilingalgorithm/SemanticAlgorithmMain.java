@@ -36,6 +36,9 @@ public class SemanticAlgorithmMain extends Configured {
         String db = args[0];
         String table = args[1];
         String timestamp = args[2];
+        //String API_Key = args[3];
+        DataDictionary.API_KEY= args[3];
+
 
         //generate data dictionary at table level
         new DataDictionary().generateSchemaDataDictionary(db, hiveContext, table, timestamp);

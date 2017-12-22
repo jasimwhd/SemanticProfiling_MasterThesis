@@ -128,13 +128,13 @@ public class DataDictionary {
                     continue;
                 }
                 resourceString= get(REST_URL + "/recommender?input=" +r[i1].get(0).toString());
+
+                if (resourceString.equals("[]") || resourceString == null) {
+                    continue;
+                }
                 resources = jsonToNode(resourceString);
                 JsonNode node= resources.get(0);
-                System.out.print("LOOP NUMBER ---------> "+ i1);
-                if(i1==229)
-                {
-                    System.out.print(r[i1].get(0).toString());
-                }
+
                 String desc_url= ((node
                         .get("coverageResult")
                         .get("annotations")

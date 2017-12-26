@@ -47,7 +47,7 @@ public class DataDictionary {
 
             //Get the available resources
             String resourcesString = get(REST_URL + "/recommender?input="
-                    + df_struct[i].name());
+                    + df_struct[i].name().replace("_","+"));
 
             resources = jsonToNode(resourcesString);
             JsonNode node= resources.get(0);
@@ -75,8 +75,7 @@ public class DataDictionary {
             String ont_uri= node.get("ontologies")
                     .get(0)
                     .findValue("@id").asText();
-            String field_name="";
-
+            String field_name=df_struct[i].name();
 
             String DD_Schema_insert="select "+
                     "'" + table+"'" + " as feed_name, "+

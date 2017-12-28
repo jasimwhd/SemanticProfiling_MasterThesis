@@ -24,7 +24,7 @@ public class DataDictionary {
     void generateSchemaDataDictionary(String db, SQLContext sqlContext, String table, String timestamp)
     {
 
-        String df_query= "select * from " + db +"."+ table+"_valid";
+        String df_query= "select * from " + db +"."+ table+"_valid where processing_dttm="+"\""+timestamp+"\"";
         DataFrame df = sqlContext.sql(df_query).toDF();
 
         StructType schema= df.schema();
@@ -46,36 +46,39 @@ public class DataDictionary {
         for (int i = 0; i < df_struct.length; i++) {
 
             //Get the available resources
+            String desc="",pref_name="",pref_type="",ont_uri="";
+            String field_name=df_struct[i].name();
+
             String resourcesString = get(REST_URL + "/recommender?input="
                     + df_struct[i].name().replace("_","+"));
 
-            resources = jsonToNode(resourcesString);
-            JsonNode node= resources.get(0);
-            String desc_url= node.get("coverageResult").get("annotations").get(0).get("annotatedClass").get("links").findValue("self").asText();
+            if(resourcesString!="")
+            {
+                resources = jsonToNode(resourcesString);
+                JsonNode node= resources.get(0);
+                String desc_url= node.get("coverageResult").get("annotations").get(0).get("annotatedClass").get("links").findValue("self").asText();
 
+                // Get the ontologies from the link we found
+                JsonNode desc_node = jsonToNode(get(desc_url));
 
+                desc=  ((desc_node.findValue("definition").get(0)) == null)
+                        ? "" : (desc_node.findValue("definition").get(0).asText());
 
-            // Get the ontologies from the link we found
-            JsonNode desc_node = jsonToNode(get(desc_url));
+                pref_name = node.get("coverageResult")
+                        .get("annotations")
+                        .get(0)
+                        .findValue("text").asText();
 
+                pref_type = node.get("coverageResult")
+                        .get("annotations")
+                        .get(0)
+                        .findValue("matchType").asText();
 
-            String desc=  ((desc_node.findValue("definition").get(0)) == null)
-                    ? "" : (desc_node.findValue("definition").get(0).asText());
+                ont_uri= node.get("ontologies")
+                        .get(0)
+                        .findValue("@id").asText();
 
-            String pref_name = node.get("coverageResult")
-                    .get("annotations")
-                    .get(0)
-                    .findValue("text").asText();
-
-            String pref_type = node.get("coverageResult")
-                    .get("annotations")
-                    .get(0)
-                    .findValue("matchType").asText();
-
-            String ont_uri= node.get("ontologies")
-                    .get(0)
-                    .findValue("@id").asText();
-            String field_name=df_struct[i].name();
+            }
 
             String DD_Schema_insert="select "+
                     "'" + table+"'" + " as feed_name, "+
@@ -86,7 +89,6 @@ public class DataDictionary {
                     "'"+ont_uri+ "'"+ " as ontology_uri, " +
                     "'"+timestamp+ "'"+ " as ts ";
 
-
             DataFrame data= sqlContext.sql(DD_Schema_insert);
 
             data.write().mode("append").saveAsTable(db+ "."+ "dd_schema");
@@ -96,7 +98,8 @@ public class DataDictionary {
 
     void generateInstanceDataDictionary(String db, SQLContext sqlContext, String table, String timestamp)
     {
-        String df_query= "select * from " + db +"."+ table+"_valid";
+        String df_query= "select * from " + db +"."+ table+"_valid"+
+                " where processing_dttm="+"\""+timestamp+"\"";
         DataFrame df = sqlContext.sql(df_query).toDF();
 
         String query="CREATE TABLE IF NOT EXISTS " + db+ "."
@@ -123,12 +126,19 @@ public class DataDictionary {
 
             for (int i1 = 0; i1 < r.length; i1++) {
 
-                if (r[i1].get(0).toString().equals("") || r[i1].get(0).toString() == null) {
+                if (r[i1].get(0).toString().equals("")
+                        || r[i1].get(0).toString() == null
+                        || (df.dtypes()[i]._2).contains("Integer")
+                        || (df.dtypes()[i]._2).contains("Double")
+                        || (df.dtypes()[i]._1).contains("processing_dttm")) {
                     continue;
                 }
+
                 resourceString= get(REST_URL + "/recommender?input=" +r[i1].get(0).toString());
 
-                if (resourceString.equals("[]") || resourceString == null) {
+                if (resourceString.equals("[]")
+                        || resourceString.equals("")
+                        || resourceString == null) {
                     continue;
                 }
                 resources = jsonToNode(resourceString);
@@ -162,12 +172,10 @@ public class DataDictionary {
                 else
                     desc="";
 
-
                 String pref_name = node.get("coverageResult")
                         .get("annotations")
                         .get(0)
                         .findValue("text").asText();
-
 
                 String pref_type = node.get("coverageResult")
                         .get("annotations")
@@ -180,10 +188,10 @@ public class DataDictionary {
 
                 String DD_Instance_insert="select "+
                         "'" + table+"'" + " as feed_name, "+
-                        "'" + df.schema().fields()[i].name()+"'" + " as field_name, "+
+                        "'" + df.schema().fields()[5].name()+"'" + " as field_name, "+
                         "'" + r[i1].get(0).toString()+"'" + " as field_value, "+
                         Integer.parseInt(r[i1].get(1).toString())+ " as frequency, "+
-                        "'"+desc+ "'"+ " as description, "+
+                        "\""+desc+ "\""+ " as description, "+
                         "'"+pref_type+ "'"+ " as preferred_type, "+
                         "'"+pref_name+ "'"+ " as preferred_label, " +
                         "'"+ont_uri+ "'"+ " as ontology_uri, "+
@@ -194,10 +202,7 @@ public class DataDictionary {
 
                 data.write().mode("append").saveAsTable(db+ "."+ "dd_instance");
             }
-
-
         }
-
     }
 
 

@@ -197,7 +197,6 @@ public class DataDictionary {
                         "'"+ont_uri+ "'"+ " as ontology_uri, "+
                         "'"+timestamp+ "'"+ " as ts";
 
-
                 DataFrame data= sqlContext.sql(DD_Instance_insert);
 
                 data.write().mode("append").saveAsTable(db+ "."+ "dd_instance");

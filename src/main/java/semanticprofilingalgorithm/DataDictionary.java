@@ -188,7 +188,7 @@ public class DataDictionary {
 
                 String DD_Instance_insert="select "+
                         "'" + table+"'" + " as feed_name, "+
-                        "'" + df.schema().fields()[5].name()+"'" + " as field_name, "+
+                        "'" + df.schema().fields()[i].name()+"'" + " as field_name, "+
                         "'" + r[i1].get(0).toString()+"'" + " as field_value, "+
                         Integer.parseInt(r[i1].get(1).toString())+ " as frequency, "+
                         "\""+desc+ "\""+ " as description, "+

@@ -53,15 +53,15 @@ public class SemanticAlgorithmMain extends Configured {
 
             //generate data dictionary at table level
             logger.info("Generating Data Dictionary at Schema Level...");
-            //new DataDictionary().generateSchemaDataDictionary(db, hiveContext, table, timestamp);
+            new DataDictionary().generateSchemaDataDictionary(db, hiveContext, table, timestamp);
 
             //generate data dictionary at record level
             logger.info("Generating Data Dictionary at Instance Level...");
-            //new DataDictionary().generateInstanceDataDictionary(db, hiveContext, table, timestamp);
+            new DataDictionary().generateInstanceDataDictionary(db, hiveContext, table, timestamp);
 
             //generate dominant ontology for each column based on data dictionary
             logger.info("Generating Dominant Ontology for each column");
-            //new DominantOntology().generateDominantOntology(db, hiveContext, table, timestamp);
+            new DominantOntology().generateDominantOntology(db, hiveContext, table, timestamp);
 
             //generate Semantic Indicators - no match, partial match and full match
             logger.info("Generating Semantic Indicators: partial, invalid, valid");

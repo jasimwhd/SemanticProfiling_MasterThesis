@@ -34,8 +34,10 @@ public class DataDictionary {
                 + "field_name string, "
                 + "description string, "
                 + "preferred_type string, "
-                + "preferred_label string, "
+                + "parsed_label string, "
                 + "ontology_uri string, "
+                + "pref_label string, "
+                + "synonyms string, "
                 + "ts string) ";
 
         DataFrame dd = sqlContext.sql(query);
@@ -46,17 +48,24 @@ public class DataDictionary {
         for (int i = 0; i < df_struct.length; i++) {
 
             //Get the available resources
-            String desc="",pref_name="",pref_type="",ont_uri="";
+            String desc="",parse_label="",pref_type="",ont_uri="", pref_label="",synonyms="";
             String field_name=df_struct[i].name();
 
             String resourcesString = get(REST_URL + "/recommender?input="
                     + df_struct[i].name().replace("_","+"));
 
-            if(resourcesString!="")
+            if(resourcesString!="" && resourcesString!=null
+                    && resourcesString!="[]")
             {
                 resources = jsonToNode(resourcesString);
                 JsonNode node= resources.get(0);
-                String desc_url= node.get("coverageResult").get("annotations").get(0).get("annotatedClass").get("links").findValue("self").asText();
+                String desc_url= node.get("coverageResult")
+                        .get("annotations")
+                        .get(0)
+                        .get("annotatedClass")
+                        .get("links")
+                        .findValue("self")
+                        .asText();
 
                 // Get the ontologies from the link we found
                 JsonNode desc_node = jsonToNode(get(desc_url));
@@ -64,7 +73,7 @@ public class DataDictionary {
                 desc=  ((desc_node.findValue("definition").get(0)) == null)
                         ? "" : (desc_node.findValue("definition").get(0).asText());
 
-                pref_name = node.get("coverageResult")
+                parse_label = node.get("coverageResult")
                         .get("annotations")
                         .get(0)
                         .findValue("text").asText();
@@ -77,7 +86,23 @@ public class DataDictionary {
                 ont_uri= node.get("ontologies")
                         .get(0)
                         .findValue("@id").asText();
+                pref_label=  ((desc_node.findValue("prefLabel")) == null)
+                        ? "" : (desc_node.findValue("prefLabel")).asText();
 
+                synonyms= ((desc_node.findValue("synonym")) == null
+                        ||(desc_node.findValue("synonym").equals("[]")))
+                        ? "" : (desc_node.findValue("synonym").get(0).asText());
+
+                if((desc_node.findValue("synonym")) != null
+                        && (!desc_node.findValue("synonym").equals("[]")))
+                {
+                    for (int j = 0; j < desc_node.findValue("synonym").size(); j++) {
+                        synonyms+=(desc_node.findValue("synonym").get(j).asText())+",";
+
+                    }
+                }
+                if (synonyms.length()>0)
+                    synonyms.substring(0, synonyms.length()-1);
             }
 
             String DD_Schema_insert="select "+
@@ -85,8 +110,10 @@ public class DataDictionary {
                     "'" +field_name +"'" + " as field_name, "+
                     "\""+desc+ "\""+ " as description, "+
                     "'"+pref_type+ "'"+ " as preferred_type, "+
-                    "'"+pref_name+ "'"+ " as preferred_label, " +
+                    "'"+parse_label+ "'"+ " as preferred_label, " +
                     "'"+ont_uri+ "'"+ " as ontology_uri, " +
+                    "'"+pref_label+ "'"+ " as pref_label, " +
+                    "'"+synonyms+ "'"+ " as synonyms, " +
                     "'"+timestamp+ "'"+ " as ts ";
 
             DataFrame data= sqlContext.sql(DD_Schema_insert);

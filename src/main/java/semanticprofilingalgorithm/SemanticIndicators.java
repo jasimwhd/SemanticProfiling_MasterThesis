@@ -96,7 +96,7 @@ public class SemanticIndicators {
         sqlContext.sql(query_partial);
 
 
-        df_partial.select(df_partial.col("field_name"),df_partial.col("field_value"),df_partial.col("frequency"),df_partial.col("processing_dttm"))
+        df_partial.select(df_partial.col("field_name"),df_partial.col("field_value"),df_partial.col("frequency"),df_partial.col("ts"))
                 .write()
                 .mode("append")
                 .saveAsTable(db+ "."+ table + "_semantic_partial_valid_match ");

@@ -54,8 +54,11 @@ public class DataDictionary {
             String resourcesString = get(REST_URL + "/recommender?input="
                     + df_struct[i].name().replace("_","+"));
 
-            if(resourcesString!="" && resourcesString!=null
-                    && resourcesString!="[]")
+            if(resourcesString.equals("") || resourcesString==null
+                    || resourcesString.equals("[]")) {
+                continue;
+            }
+            else
             {
                 resources = jsonToNode(resourcesString);
                 JsonNode node= resources.get(0);
@@ -90,11 +93,11 @@ public class DataDictionary {
                         ? "" : (desc_node.findValue("prefLabel")).asText();
 
                 synonyms= ((desc_node.findValue("synonym")) == null
-                        ||(desc_node.findValue("synonym").equals("[]")))
+                        ||(desc_node.findValue("synonym").size()==0))
                         ? "" : (desc_node.findValue("synonym").get(0).asText());
 
                 if((desc_node.findValue("synonym")) != null
-                        && (!desc_node.findValue("synonym").equals("[]")))
+                        && (desc_node.findValue("synonym").size()>0))
                 {
                     for (int j = 0; j < desc_node.findValue("synonym").size(); j++) {
                         synonyms+=(desc_node.findValue("synonym").get(j).asText())+",";

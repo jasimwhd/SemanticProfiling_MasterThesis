@@ -57,7 +57,7 @@ public class SemanticAlgorithmMain extends Configured {
 
             //generate data dictionary at record level
             logger.info("Generating Data Dictionary at Instance Level...");
-            new DataDictionary().generateInstanceDataDictionary(db, hiveContext, table, timestamp);
+            //new DataDictionary().generateInstanceDataDictionary(db, hiveContext, table, timestamp);
 
             //generate dominant ontology for each column based on data dictionary
             logger.info("Generating Dominant Ontology for each column");

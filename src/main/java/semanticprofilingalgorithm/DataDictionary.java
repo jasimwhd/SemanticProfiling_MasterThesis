@@ -166,7 +166,7 @@ public class DataDictionary {
                 }
 
                 resourceString= get(REST_URL + "/recommender?input=" +r[i1].get(0).toString());
-
+                //resourceString= get(REST_URL + "/recommender?input=" +"hcl");
                 if (resourceString.equals("[]")
                         || resourceString.equals("")
                         || resourceString == null) {
@@ -202,6 +202,7 @@ public class DataDictionary {
                     desc= desc_node.findValue("prefLabel").asText();
                 else
                     desc="";
+                desc.replace("\"","&quote;");
 
                 String pref_name = node.get("coverageResult")
                         .get("annotations")
@@ -224,10 +225,12 @@ public class DataDictionary {
                         ? "" : (desc_node.findValue("definition").get(0).asText());
                 */
                 String ont_name;
-                if(ontology_node.findValue("name").asText() != null)
-                    ont_name =ontology_node.findValue("name").asText();
+                if(ontology_node.findValue("name").asText() == null ||
+                        ontology_node.findValue("name").asText().equals("") ||
+                        ontology_node.findValue("name").asText().equals("[]"))
+                    ont_name ="";
                 else
-                    ont_name="";
+                    ont_name=ontology_node.findValue("name").asText();;
 
                 String DD_Instance_insert="select "+
                         "'" + table+"'" + " as feed_name, "+

@@ -53,7 +53,7 @@ public class SemanticAlgorithmMain extends Configured {
 
             //generate data dictionary at table level
             logger.info("Generating Data Dictionary at Schema Level...");
-            new DataDictionary().generateSchemaDataDictionary(db, hiveContext, table, timestamp);
+            //new DataDictionary().generateSchemaDataDictionary(db, hiveContext, table, timestamp);
 
             //generate data dictionary at record level
             logger.info("Generating Data Dictionary at Instance Level...");

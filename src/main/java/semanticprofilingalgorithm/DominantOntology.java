@@ -22,7 +22,7 @@ public class DominantOntology {
                 "FROM \n" +
                 "(select t1.field_name as field_name, \n" +
                 "max(t1.total_sum) over (partition by t1.field_name,t1.ontology_uri order by t1.field_name asc) as total_sum, \n" +
-                "t1.ontology_uri as ontology_uri, row_number() over (partition by t1.field_name order by t1.field_name asc) as row_no \n" +
+                "t1.ontology_uri as ontology_uri, row_number() over (partition by t1.field_name order by t1.total_sum desc) as row_no \n" +
                 "from \n" +
                 "( \n" +
                 "   select field_name, sum(frequency) as total_sum, ontology_uri \n" +

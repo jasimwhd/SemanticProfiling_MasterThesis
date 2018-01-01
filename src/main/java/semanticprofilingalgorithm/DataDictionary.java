@@ -142,6 +142,7 @@ public class DataDictionary {
                 + "preferred_type string, "
                 + "preferred_label string, "
                 + "ontology_uri string, "
+                + "ontology_name string, "
                 + "ts string) ";
 
         JsonNode resources;
@@ -216,6 +217,18 @@ public class DataDictionary {
                         .get(0)
                         .findValue("@id").asText();
 
+                //add ontology name
+
+                JsonNode ontology_node= jsonToNode(get(ont_uri));
+                /*String desc=  ((desc_node.findValue("definition").get(0)) == null)
+                        ? "" : (desc_node.findValue("definition").get(0).asText());
+                */
+                String ont_name;
+                if(ontology_node.findValue("name").asText() != null)
+                    ont_name =ontology_node.findValue("name").asText();
+                else
+                    ont_name="";
+
                 String DD_Instance_insert="select "+
                         "'" + table+"'" + " as feed_name, "+
                         "'" + df.schema().fields()[i].name()+"'" + " as field_name, "+
@@ -225,6 +238,7 @@ public class DataDictionary {
                         "'"+pref_type+ "'"+ " as preferred_type, "+
                         "'"+pref_name+ "'"+ " as preferred_label, " +
                         "'"+ont_uri+ "'"+ " as ontology_uri, "+
+                        "'"+ont_name+ "'"+ " as ontology_name, "+
                         "'"+timestamp+ "'"+ " as ts";
 
                 DataFrame data= sqlContext.sql(DD_Instance_insert);

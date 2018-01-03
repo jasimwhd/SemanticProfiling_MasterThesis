@@ -164,9 +164,9 @@ public class DataDictionary {
                         || (df.dtypes()[i]._1).contains("processing_dttm")) {
                     continue;
                 }
-
-                resourceString= get(REST_URL + "/recommender?input=" +r[i1].get(0).toString());
-                //resourceString= get(REST_URL + "/recommender?input=" +"hcl");
+                String input = r[i1].get(0).toString().replaceAll(" ","+");
+                resourceString= get(REST_URL + "/recommender?input=" +input);
+                //resourceString= get(REST_URL + "/recommender?input=" +"mrt");
                 if (resourceString.equals("[]")
                         || resourceString.equals("")
                         || resourceString == null) {
@@ -202,7 +202,8 @@ public class DataDictionary {
                     desc= desc_node.findValue("prefLabel").asText();
                 else
                     desc="";
-                desc.replace("\"","&quote;");
+                desc=desc.replaceAll("\"","");
+                desc=desc.replaceAll("\n"," ");
 
                 String pref_name = node.get("coverageResult")
                         .get("annotations")

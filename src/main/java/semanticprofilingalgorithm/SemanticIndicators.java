@@ -50,7 +50,7 @@ public class SemanticIndicators {
         );
 
         //---------------------**generate valid match indicator **-----------------------------------
-        DataFrame df_valid = sqlContext.sql("select " +
+        DataFrame df_valid = sqlContext.sql("select distinct " +
                 "dd_instance.field_name,dd_instance.field_value, dd_instance.frequency, dd_instance.ts" +
                 " from "+db +"."+ "dd_instance, "+ db +"."+ "dominant_ontology" +
                 " where dd_instance.field_value=dd_instance.preferred_label and " +
@@ -59,6 +59,7 @@ public class SemanticIndicators {
                 " and dd_instance.preferred_type='PREF'" +
                 " and dd_instance.ts="+ "'"+ timestamp+"'")
                 .toDF("field_name","field_value","frequency" ,"processing_dttm");
+
 
         String query_valid = "CREATE TABLE IF NOT EXISTS " + db + "."
                 + table + "_semantic_valid_match " + "(field_name string, field_value string, frequency int, processing_dttm string )";
@@ -88,6 +89,18 @@ public class SemanticIndicators {
                 " from " + db+"."+ table+"_semantic_valid_match"+ ") t2 " +
                 " ON (t1.field_name=t2.field_name AND t1.field_value=t2.field_value) " +
                 " WHERE t2.field_name IS NULL OR t2.field_value IS NULL");
+
+        //if dominant ontology is indeed a synonymous value itself, capture only synonymous values from data dictionary
+
+        if(df_partial.collect().length==0)
+            df_partial=sqlContext.sql("select distinct " +
+                    "dd_instance.field_name,dd_instance.field_value, dd_instance.frequency, dd_instance.ts" +
+                    " from "+db +"."+ "dd_instance, "+ db +"."+ "dominant_ontology" +
+                    " where  " +
+                    " dd_instance.ontology_uri=dominant_ontology.ontology_uri" +
+                    " and dd_instance.feed_name="+ "'"+ table+"'" +
+                    " and dd_instance.ts="+ "'"+ timestamp+"'")
+                    .toDF("field_name","field_value","frequency" ,"ts");
 
         String query_partial = "CREATE TABLE IF NOT EXISTS " + db + "."
                 + table + "_semantic_partial_valid_match " +

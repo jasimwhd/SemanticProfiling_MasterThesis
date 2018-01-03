@@ -10,13 +10,6 @@ import static org.apache.spark.sql.functions.sum;
 public class DominantOntology {
     void generateDominantOntology(String db, SQLContext sqlContext, String table, String timestamp)
     {
-        //correct this logic frequency*count
-        /*String df_query= "select  field_name, ontology_uri, frequency*count(ontology_uri)" +
-                " from " + db+"."
-                + "dd_instance"
-                +" where " + "feed_name="+ "'"+ table +"'"
-                +" and ts="+"'"+timestamp+"'"
-                + " GROUP BY field_name,frequency,ontology_uri";*/
 
         String df_query= "SELECT res.field_name, res.total_sum, res.ontology_uri " +
                 "FROM \n" +
@@ -33,14 +26,12 @@ public class DominantOntology {
                 "   group by ontology_uri,field_name\n " +
                 ") t1) res\n " +
                 "WHERE res.row_no=1";
+
+
         DataFrame df = sqlContext.sql(df_query);
 
 
-        /*Row[] dom_results = df.groupBy("field_name","ontology_uri")
-                .agg(functions.sum(("frequency_count"))).collect();*/
-
         Row[] dom_results = df.collect();
-
 
         String query="CREATE TABLE IF NOT EXISTS " + db+ "."
                 + "dominant_ontology "
